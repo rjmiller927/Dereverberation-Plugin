@@ -19,10 +19,13 @@ private:
     vector<float> w;    // Adaptive Filter Coefficients
     float mu;           // Learning rate
     float e;            // Error between filter output and desired signal
+    int M;              // Filter order
+    
     
 public:
-    void getMu();
+    float getMu();
     void setMu(float mu);
+    void updateCoefficients(vector<float> &w,float mu,float e, vector<float> x);
     
 };
 

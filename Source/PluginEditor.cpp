@@ -10,6 +10,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "AdaptiveFilter.hpp"
 
 //==============================================================================
 DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcessor& p)
@@ -40,13 +41,13 @@ DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcess
     learningRateSlider.setTextBoxStyle(Slider::NoTextBox, true, 0.0f, 0.0f);
     addAndMakeVisible(learningRateSlider);
     
-    // FILTER LENGTH SLIDER
-    filterLengthSlider.addListener(this);
-    filterLengthSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    filterLengthSlider.setRange(0.0f, 2.0f, 0.01f); // Value in seconds
-    filterLengthSlider.setBounds(300, 180, 125, 110);
-    filterLengthSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 20);
-    addAndMakeVisible(filterLengthSlider);
+    // MAKEUP GAIN SLIDER
+    makeupGainSlider.addListener(this);
+    makeupGainSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    makeupGainSlider.setRange(-12.0f, 12.0f, 0.01f); // Value in dB
+    makeupGainSlider.setBounds(300, 180, 125, 110);
+    makeupGainSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 20);
+    addAndMakeVisible(makeupGainSlider);
     
 }
 
@@ -64,11 +65,13 @@ void DereverbAudioProcessorEditor::paint (Graphics& g)
     g.setColour (Colours::white);
     g.setFont (30.0f);
     g.drawFittedText ("De-Reverberator", getLocalBounds(), Justification::centredTop, 1);
+    g.setFont(12.0f);
+    g.drawFittedText("Ryan Miller", getLocalBounds(), Justification::bottomRight, 1);
     
     // Slider Labels
     g.setFont(20.0f);
     g.drawFittedText("Optimization Speed", 65, 150, 150, 50, Justification::centred, 1);
-    g.drawFittedText("Reverb Length (sec)", 290, 150, 150, 50, Justification::centred, 1);
+    g.drawFittedText("Make-up Gain (dB)", 290, 150, 150, 50, Justification::centred, 1);
     
     g.setFont(15.0f);
     g.drawFittedText("Slow", 60, 250, 50, 50, Justification::left, 1);
@@ -84,4 +87,18 @@ void DereverbAudioProcessorEditor::resized()
 
 void DereverbAudioProcessorEditor::sliderValueChanged(Slider *slider){
     
+    // Reverb Reduction Slider
+    if (slider == &reverbReductionSlider){
+        processor.mix = slider->getValue() / 100.0f; // Convert % to 0-1 scale
+    }
+    
+    // Learning Rate Slider
+    if (slider == &learningRateSlider){
+        processor.adaptiveFilter->setMu(slider->getValue());
+    }
+    
+    // Make-up gain Slider
+    if (slider == &makeupGainSlider){
+        processor.gain = slider -> getValue();
+    }
 }

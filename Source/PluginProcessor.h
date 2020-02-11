@@ -11,6 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "AdaptiveFilter.hpp"
 
 
 //==============================================================================
@@ -57,6 +58,16 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     
+    //==============================================================================
+    // USER DEFINED VARIABLES
+    //==============================================================================
+    
+    // Mix corresponds to reverb reduction amount. When reduction is 100%, that means that the output is entirely the adaptive filter output. When reduction is 0%, then the output is the same as the input
+    float mix;
+    float gain;
+    
+    // Adaptive Filter Object
+    AdaptiveFilter *adaptiveFilter;
 
 private:
     //==============================================================================
@@ -64,5 +75,6 @@ private:
     
     // Sampling Rate
     int Fs;
+    float input;
     
 };
