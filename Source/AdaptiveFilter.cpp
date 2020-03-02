@@ -5,6 +5,8 @@
 //  Created by Ryan Miller on 2/8/20.
 //
 
+
+
 #include "AdaptiveFilter.hpp"
 
 void AdaptiveFilter::setMu(float mu){

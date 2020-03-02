@@ -5,6 +5,8 @@
 //  Created by Ryan Miller on 2/8/20.
 //
 
+
+
 #ifndef AdaptiveFilter_hpp
 #define AdaptiveFilter_hpp
 

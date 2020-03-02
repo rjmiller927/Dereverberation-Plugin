@@ -8,6 +8,8 @@
   ==============================================================================
 */
 
+
+
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "AdaptiveFilter.hpp"
@@ -46,7 +48,7 @@ DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcess
     makeupGainSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
     makeupGainSlider.setRange(-12.0f, 12.0f, 0.01f); // Value in dB
     makeupGainSlider.setBounds(300, 180, 125, 110);
-    makeupGainSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 20);
+    makeupGainSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 50, 20);
     addAndMakeVisible(makeupGainSlider);
     
 }
