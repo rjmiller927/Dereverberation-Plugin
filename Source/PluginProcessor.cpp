@@ -140,12 +140,7 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
+    
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
@@ -153,9 +148,17 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     for (int channel = 0; channel < totalNumInputChannels; ++channel){
         for (int sample = 0; sample < buffer.getNumSamples(); sample++){
             input = buffer.getReadPointer(channel)[sample];
-            buffer.getWritePointer(channel)[sample] = input * pow(10, makeupGain/20.0f);
+            
+            // Plugin NOT bypassed, process signal
+            if (bypassCheck == 1){
+                buffer.getWritePointer(channel)[sample] = input * pow(10, makeupGain/20.0f);
+            }
+            
+            // Plugin BYPASSED, don't process signal
+            else{
+                buffer.getWritePointer(channel)[sample] = input;
+            }
         }
-        
         
     }
 }

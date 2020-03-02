@@ -20,7 +20,8 @@
 /**
 */
 class DereverbAudioProcessorEditor  :   public AudioProcessorEditor,
-                                        public Slider::Listener
+                                        public Slider::Listener,
+                                        public Button::Listener
 {
 public:
     DereverbAudioProcessorEditor (DereverbAudioProcessor&);
@@ -32,6 +33,8 @@ public:
     
     void sliderValueChanged(Slider *slider) override;
     
+    void buttonClicked(Button *button) override;
+    
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -42,9 +45,12 @@ private:
     Slider reverbReductionSlider;
     Slider makeupGainSlider;
     
+    ToggleButton bypassButton;
+    
     // GUI Labels
     Label reverbSliderLabel;
     Label makeupGainLabel;
+    Label bypassLabel;
     
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DereverbAudioProcessorEditor)

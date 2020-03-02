@@ -47,6 +47,16 @@ DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcess
     makeupGainLabel.attachToComponent(&makeupGainSlider, false);
     makeupGainLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(makeupGainLabel);
+    
+    // BYPASS BUTTON
+    bypassButton.addListener(this);
+    bypassButton.setBounds(50, 130, 75, 30);
+    addAndMakeVisible(bypassButton);
+    
+    bypassLabel.setText("Bypass", dontSendNotification);
+    bypassLabel.attachToComponent(&bypassButton, false);
+    bypassLabel.setJustificationType(Justification::left);
+    addAndMakeVisible(bypassLabel);
 
     
 }
@@ -89,4 +99,12 @@ void DereverbAudioProcessorEditor::sliderValueChanged(Slider *slider){
     if (slider == &makeupGainSlider){
         processor.makeupGain = slider -> getValue();
     }
+}
+
+void DereverbAudioProcessorEditor::buttonClicked(Button *button){
+    
+    if (button == &bypassButton){
+        processor.bypassCheck *= -1;
+    }
+    
 }

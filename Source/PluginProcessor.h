@@ -60,6 +60,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     
+    // Checks if plugin is in bypass state (-1) or not (1)
+    int bypassCheck = 1;
+    
     //==============================================================================
     // USER DEFINED VARIABLES
     //==============================================================================

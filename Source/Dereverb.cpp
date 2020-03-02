@@ -4,6 +4,8 @@
 //
 //  Created by Ryan Miller on 2/8/20.
 //
+//
+
 
 
 
@@ -23,6 +25,19 @@ void Dereverb::setAlpha(float dereverbPercent){
     
 }
 
+void Dereverb::setR1R2(float r1, float r2, float p){
+    
+    R1 = (1.f-alpha1)*p + alpha1*R1prev;
+    R2 = (1.f-alpha2)*p + alpha2*R2prev;
+    
+    R1prev = R1;
+    R2prev = R2;
+    
+    // Set new masking gain after updating R1, R2
+    setMaskingGain(R1, R2);
+    
+}
+
 void Dereverb::setMaskingGain(float R1, float R2){
     
     if ((R1 / R2) >= 1){
@@ -36,18 +51,5 @@ void Dereverb::setMaskingGain(float R1, float R2){
             maskingGain = R1 / R2;
         }
     }
-    
-}
-
-void Dereverb::setR1R2(float r1, float r2, float p){
-    
-    R1 = (1.f-alpha1)*p + alpha1*R1prev;
-    R2 = (1.f-alpha2)*p + alpha2*R2prev;
-    
-    R1prev = R1;
-    R2prev = R2;
-    
-    // Set new masking gain after updating R1, R2
-    setMaskingGain(R1, R2);
     
 }
