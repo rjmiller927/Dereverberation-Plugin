@@ -27,13 +27,13 @@ DereverbAudioProcessor::DereverbAudioProcessor()
 #endif
 {
     
-    adaptiveFilter = new AdaptiveFilter;
+    dereverbFilter = new Dereverb;
     
 }
 
 DereverbAudioProcessor::~DereverbAudioProcessor()
 {
-    delete adaptiveFilter;
+    delete dereverbFilter;
 }
 
 //==============================================================================

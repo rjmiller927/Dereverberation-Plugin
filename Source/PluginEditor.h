@@ -14,7 +14,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "AdaptiveFilter.hpp"
+#include "Dereverb.hpp"
 
 //==============================================================================
 /**

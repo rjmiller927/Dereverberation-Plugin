@@ -12,7 +12,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "AdaptiveFilter.hpp"
+
 
 //==============================================================================
 DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcessor& p)

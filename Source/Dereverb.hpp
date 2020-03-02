@@ -7,8 +7,8 @@
 
 
 
-#ifndef AdaptiveFilter_hpp
-#define AdaptiveFilter_hpp
+#ifndef Dereverb_hpp
+#define Dereverb_hpp
 
 #include <stdio.h>
 #include <iostream>
@@ -16,7 +16,7 @@
 
 using namespace std;
 
-class AdaptiveFilter{
+class Dereverb{
 private:
     vector<float> w;    // Adaptive Filter Coefficients
     float mu;           // Learning rate

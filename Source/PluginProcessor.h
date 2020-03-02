@@ -13,7 +13,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "AdaptiveFilter.hpp"
+#include "Dereverb.hpp"
 
 
 //==============================================================================
@@ -69,7 +69,7 @@ public:
     float gain;
     
     // Adaptive Filter Object
-    AdaptiveFilter *adaptiveFilter;
+    Dereverb *dereverbFilter;
 
 private:
     //==============================================================================
