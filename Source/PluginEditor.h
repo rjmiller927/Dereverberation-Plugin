@@ -44,6 +44,7 @@ private:
     
     // GUI Labels
     Label reverbSliderLabel;
+    Label makeupGainLabel;
     
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DereverbAudioProcessorEditor)
