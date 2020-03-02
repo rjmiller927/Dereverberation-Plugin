@@ -40,7 +40,6 @@ private:
     
     // Define GUI controls
     Slider reverbReductionSlider;
-    Slider learningRateSlider;
     Slider makeupGainSlider;
     
     // GUI Labels

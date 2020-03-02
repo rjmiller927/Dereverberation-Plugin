@@ -35,14 +35,6 @@ DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcess
     reverbSliderLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(reverbSliderLabel);
     
-    // LEARNING RATE SLIDER
-    learningRateSlider.addListener(this);
-    learningRateSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    learningRateSlider.setRange(0.001f, 0.01f, 0.001f);
-    learningRateSlider.setBounds(75, 180, 125, 110);
-    learningRateSlider.setTextBoxStyle(Slider::NoTextBox, true, 0.0f, 0.0f);
-    addAndMakeVisible(learningRateSlider);
-    
     // MAKEUP GAIN SLIDER
     makeupGainSlider.addListener(this);
     makeupGainSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
@@ -92,11 +84,6 @@ void DereverbAudioProcessorEditor::sliderValueChanged(Slider *slider){
     // Reverb Reduction Slider
     if (slider == &reverbReductionSlider){
         processor.mix = slider->getValue() / 100.0f; // Convert % to 0-1 scale
-    }
-    
-    // Learning Rate Slider
-    if (slider == &learningRateSlider){
-        processor.adaptiveFilter->setMu(slider->getValue());
     }
     
     // Make-up gain Slider
