@@ -82,11 +82,11 @@ void DereverbAudioProcessorEditor::sliderValueChanged(Slider *slider){
     
     // Reverb Reduction Slider
     if (slider == &reverbReductionSlider){
-        processor.mix = slider->getValue() / 100.0f; // Convert % to 0-1 scale
+        
     }
     
     // Make-up gain Slider
     if (slider == &makeupGainSlider){
-        processor.gain = slider -> getValue();
+        processor.makeupGain = slider -> getValue();
     }
 }

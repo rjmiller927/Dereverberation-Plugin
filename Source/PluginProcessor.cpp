@@ -153,7 +153,7 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     for (int channel = 0; channel < totalNumInputChannels; ++channel){
         for (int sample = 0; sample < buffer.getNumSamples(); sample++){
             input = buffer.getReadPointer(channel)[sample];
-            buffer.getWritePointer(channel)[sample] = input * pow(10, gain/20.0f);
+            buffer.getWritePointer(channel)[sample] = input * pow(10, makeupGain/20.0f);
         }
         
         

@@ -18,16 +18,28 @@ using namespace std;
 
 class Dereverb{
 private:
-    vector<float> w;    // Adaptive Filter Coefficients
-    float mu;           // Learning rate
-    float e;            // Error between filter output and desired signal
-    int M;              // Filter order
+    float rt60 = 1.f;
     
+    // Alpha values used to control amount of reverb reduction
+    float alpha1 = 0.8f;
+    float alpha2 = 0.2f;
+    
+    // R1, R2 are the averaged power spectrum values
+    float R1 = 0.0f;
+    float R2 = 0.0f;
+    float R1prev = 0.0f;
+    float R2prev = 0.0f;
+    
+    // Masking gain
+    float maskingGain = 0.0f;
+    
+    void setMaskingGain(float R1, float R2);
     
 public:
-    float getMu();
-    void setMu(float mu);
-    void updateCoefficients(vector<float> &w,float mu,float e, vector<float> x);
+    
+    void setAlpha(float dereverbPercent);
+    void setR1R2(float r1, float r2, float p);
+    
     
 };
 
