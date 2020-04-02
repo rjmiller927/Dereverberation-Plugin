@@ -152,9 +152,6 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
-
-    // Use audio-buffer constructor of dsp::AudioBlock to use in JUCE DSP module
-    // dsp::AudioBlock<float> block(buffer);
     
     // Cast buffer to an AudioSourceChannelInfo type
     AudioSourceChannelInfo bufferToFill = (AudioSourceChannelInfo(buffer));
@@ -183,14 +180,7 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
             nextFFTBlockReady = false;
             
         }
-        
     }
-    
-    
-    // Replaces our block with a new one that has the gain that has been changed
-    // block.copyTo(buffer);
-    
-    
 }
 
 void DereverbAudioProcessor::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill, int channel){
