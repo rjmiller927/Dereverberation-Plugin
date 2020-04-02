@@ -7,9 +7,11 @@
 //
 
 
-
-
 #include "Dereverb.hpp"
+
+using namespace std;
+
+
 
 void Dereverb::setAlpha(float dereverbPercent){
     
@@ -44,7 +46,9 @@ void Dereverb::setMaskingGain(float R1, float R2){
         maskingGain = 0.f;
     }
     else{
-        if (R2 == 0.f){
+        // Alternatively, try if (R2 == 0.f)
+        float epsilon = numeric_limits<double>::epsilon();
+        if (R2 < epsilon){
             maskingGain = 0.f;
         }
         else{

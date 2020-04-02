@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <JuceHeader.h>
 
 using namespace std;
 
@@ -39,11 +40,13 @@ private:
     
     void setMaskingGain(float R1, float R2);
     
+    
 public:
     
     void setAlpha(float dereverbPercent);
     void setR1R2(float r1, float r2, float p);
     
+    void processBlock(float *channelData, int numSamples);
     
 };
 
