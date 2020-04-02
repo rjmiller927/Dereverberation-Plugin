@@ -18,18 +18,27 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include <JuceHeader.h>
 
 using namespace std;
 
 class Dereverb{
+public:
+    
+    void setAlpha(float dereverbPercent); // dereverbPercent == [0.f,100.f]
+    void processBlock(float *fftChannelData, int numSamples);
+
 private:
     
     // Alpha values used to control amount of reverb reduction
     float alpha1 = 0.8f;
     float alpha2 = 0.2f;
     
-    // R1, R2 are the averaged power spectrum values
+    // FFT bin magnitude squared value
+    float P = 0.f;
+    
+    // R1, R2 are the averaged power spectrum values. Calculated using exponential moving average
     float R1 = 0.0f;
     float R2 = 0.0f;
     float R1prev = 0.0f;
@@ -38,15 +47,9 @@ private:
     // Masking gain
     float maskingGain = 0.0f;
     
+    // R1, R2, maskingGain update methods
+    void setR1R2(float inputPower);
     void setMaskingGain(float R1, float R2);
-    
-    
-public:
-    
-    void setAlpha(float dereverbPercent);
-    void setR1R2(float r1, float r2, float p);
-    
-    void processBlock(float *channelData, int numSamples);
     
 };
 

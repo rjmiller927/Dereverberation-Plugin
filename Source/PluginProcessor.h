@@ -70,6 +70,7 @@ public:
     // Mix corresponds to reverb reduction amount. When reduction is 100%, that means that the output is entirely the adaptive filter output. When reduction is 0%, then the output is the same as the input
     float mix;
     float makeupGain;
+    float reverbReductionPercent = 50.f;
     
     // Adaptive Filter Object
     Dereverb *dereverbFilter;

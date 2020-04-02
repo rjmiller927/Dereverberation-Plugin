@@ -153,10 +153,15 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
+    // Update alpha values
+    dereverbFilter->setAlpha(reverbReductionPercent);
+    
     // Cast buffer to an AudioSourceChannelInfo type
-    AudioSourceChannelInfo bufferToFill = (AudioSourceChannelInfo(buffer));
+    AudioSourceChannelInfo bufferToFill = AudioSourceChannelInfo(buffer);
     
-    
+    //================================
+    // Process Block
+    //================================
     for (int channel = 0; channel < buffer.getNumChannels(); channel++){
         
         // Prepare next audio block for FFT
@@ -164,14 +169,14 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
         
         if (nextFFTBlockReady == true){
             
-            // Apply window
+            // Apply window filter
             window.multiplyWithWindowingTable(fftData[channel],sizeof(fftData[channel]));
             
             // FFT. According to JUCE documentation, the forward FFT interleaves real and imaginary parts, such that the first value is real and the second value is the associated imaginary component.
             fft.performRealOnlyForwardTransform(fftData[channel]);
             
             // Dereverb Processing
-            // ....
+            dereverbFilter->processBlock(fftData[channel], 2*fftSize);
             
             // IFFT
             fft.performRealOnlyInverseTransform(fftData[channel]);
