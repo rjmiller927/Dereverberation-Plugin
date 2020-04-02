@@ -91,15 +91,15 @@ private:
     // FFT Object from JUCE DSP module
     dsp::FFT fft;
     // dsp::FFT fft2{fftOrder}; // Initialize directly with int order (FFT size is 2^fftOrder)
-    float fifo[fftSize];
-    float fftData[2*fftSize];
-    int fifoIndex = 0;
+    float fifo[2][fftSize];
+    float fftData[2][2*fftSize];
+    int fifoIndex[2] = {0};
     bool nextFFTBlockReady = false;
     
     dsp::WindowingFunction<float> window;
     
-    void getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill);
-    void pushNextSampleIntoFifo(float sample) noexcept;
+    void getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill, int channel);
+    void pushNextSampleIntoFifo(float sample, int channel) noexcept;
     
     int N;
     

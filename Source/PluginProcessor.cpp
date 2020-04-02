@@ -157,21 +157,32 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     // dsp::AudioBlock<float> block(buffer);
     
     // Cast buffer to an AudioSourceChannelInfo type
-    (AudioSourceChannelInfo(buffer));
+    AudioSourceChannelInfo bufferToFill = (AudioSourceChannelInfo(buffer));
     
     
     for (int channel = 0; channel < buffer.getNumChannels(); channel++){
         
-        auto* channelData = buffer.getWritePointer(channel);
+        // Prepare next audio block for FFT
+        getNextAudioBlock(bufferToFill, channel);
         
-        // Apply window
-        window.multiplyWithWindowingTable(channelData, N);
-    
-        
-        fft.performRealOnlyForwardTransform(channelData);
-        fft.performRealOnlyInverseTransform(channelData);
-        
-        
+        if (nextFFTBlockReady == true){
+            
+            // Apply window
+            window.multiplyWithWindowingTable(fftData[channel],sizeof(fftData[channel]));
+            
+            // FFT. According to JUCE documentation, the forward FFT interleaves real and imaginary parts, such that the first value is real and the second value is the associated imaginary component.
+            fft.performRealOnlyForwardTransform(fftData[channel]);
+            
+            // Dereverb Processing
+            // ....
+            
+            // IFFT
+            fft.performRealOnlyInverseTransform(fftData[channel]);
+            
+            // Reset nextFFTBlockReady
+            nextFFTBlockReady = false;
+            
+        }
         
     }
     
@@ -182,21 +193,30 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     
 }
 
-void DereverbAudioProcessor::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill){
+void DereverbAudioProcessor::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill, int channel){
     if (bufferToFill.buffer->getNumChannels() > 0){
-        auto *channelData = bufferToFill.buffer->getReadPointer(0, bufferToFill.startSample);
+        auto *channelData = bufferToFill.buffer->getReadPointer(channel, bufferToFill.startSample);
         
         for (auto i=0; i < bufferToFill.numSamples; i++){
-            pushNextSampleIntoFifo(channelData[i]);
+            pushNextSampleIntoFifo(channelData[i], channel);
         }
     }
 }
 
 
-void DereverbAudioProcessor::pushNextSampleIntoFifo(float sample) noexcept{
-    if (fifoIndex == fftSize){
-        
+void DereverbAudioProcessor::pushNextSampleIntoFifo(float sample, int channel) noexcept{
+    if (fifoIndex[channel] == fftSize){
+        if (!nextFFTBlockReady){
+            zeromem(fftData, sizeof(fftData));
+            memcpy(fftData, fifo, sizeof(fifo));
+            nextFFTBlockReady = true;
+        }
+        fifoIndex[channel] = 0;
     }
+    
+    fifo[channel][fifoIndex[channel]] = sample;
+    fifoIndex[channel]++;
+    
 }
 
 //==============================================================================
