@@ -60,12 +60,12 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     
-    // Checks if plugin is in bypass state (-1) or not (1)
-    int bypassCheck = 1;
-    
     //==============================================================================
     // USER DEFINED VARIABLES
     //==============================================================================
+    
+    // Checks if plugin is in bypass state (-1) or not (1)
+    int bypassCheck = 1;
     
     // Mix corresponds to reverb reduction amount. When reduction is 100%, that means that the output is entirely the adaptive filter output. When reduction is 0%, then the output is the same as the input
     float mix;
@@ -73,6 +73,11 @@ public:
     
     // Adaptive Filter Object
     Dereverb *dereverbFilter;
+    
+    enum {
+        fftOrder = 12, // FFT Size is 2^fftOrder
+        fftSize = 1 << fftOrder
+    };
 
 private:
     //==============================================================================
@@ -82,4 +87,21 @@ private:
     int Fs;
     float input;
     
+    //==============================================================================
+    // FFT Object from JUCE DSP module
+    dsp::FFT fft;
+    // dsp::FFT fft2{fftOrder}; // Initialize directly with int order (FFT size is 2^fftOrder)
+    float fifo[fftSize];
+    float fftData[2*fftSize];
+    int fifoIndex = 0;
+    bool nextFFTBlockReady = false;
+    
+    dsp::WindowingFunction<float> window;
+    
+    void getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill);
+    void pushNextSampleIntoFifo(float sample) noexcept;
+    
+    int N;
+    
+    //==============================================================================
 };

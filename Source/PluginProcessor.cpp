@@ -23,7 +23,12 @@ DereverbAudioProcessor::DereverbAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
+        // ======================================================
+        // Initialize FFT order in the constructor
+        // ======================================================
+        fft(fftOrder),
+        window(fftSize, dsp::WindowingFunction<float>::hann) // Initialize window function
 #endif
 {
     
@@ -102,6 +107,11 @@ void DereverbAudioProcessor::changeProgramName (int index, const String& newName
 void DereverbAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     Fs = sampleRate;
+    N = samplesPerBlock;
+    
+    
+    // Initialize FFT settings
+    
 }
 
 void DereverbAudioProcessor::releaseResources()
@@ -139,26 +149,52 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
-
     
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    // Use audio-buffer constructor of dsp::AudioBlock to use in JUCE DSP module
+    // dsp::AudioBlock<float> block(buffer);
     
-    for (int channel = 0; channel < totalNumInputChannels; ++channel){
-        for (int sample = 0; sample < buffer.getNumSamples(); sample++){
-            input = buffer.getReadPointer(channel)[sample];
-            
-            // Plugin NOT bypassed, process signal
-            if (bypassCheck == 1){
-                buffer.getWritePointer(channel)[sample] = input * pow(10, makeupGain/20.0f);
-            }
-            
-            // Plugin BYPASSED, don't process signal
-            else{
-                buffer.getWritePointer(channel)[sample] = input;
-            }
+    // Cast buffer to an AudioSourceChannelInfo type
+    (AudioSourceChannelInfo(buffer));
+    
+    
+    for (int channel = 0; channel < buffer.getNumChannels(); channel++){
+        
+        auto* channelData = buffer.getWritePointer(channel);
+        
+        // Apply window
+        window.multiplyWithWindowingTable(channelData, N);
+    
+        
+        fft.performRealOnlyForwardTransform(channelData);
+        fft.performRealOnlyInverseTransform(channelData);
+        
+        
+        
+    }
+    
+    
+    // Replaces our block with a new one that has the gain that has been changed
+    // block.copyTo(buffer);
+    
+    
+}
+
+void DereverbAudioProcessor::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill){
+    if (bufferToFill.buffer->getNumChannels() > 0){
+        auto *channelData = bufferToFill.buffer->getReadPointer(0, bufferToFill.startSample);
+        
+        for (auto i=0; i < bufferToFill.numSamples; i++){
+            pushNextSampleIntoFifo(channelData[i]);
         }
+    }
+}
+
+
+void DereverbAudioProcessor::pushNextSampleIntoFifo(float sample) noexcept{
+    if (fifoIndex == fftSize){
         
     }
 }
@@ -194,3 +230,7 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new DereverbAudioProcessor();
 }
+
+
+
+
