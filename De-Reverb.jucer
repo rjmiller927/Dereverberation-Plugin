@@ -4,6 +4,8 @@
               pluginFormats="buildAU,buildStandalone">
   <MAINGROUP id="iV6xtq" name="De-Reverb">
     <GROUP id="{12F0D700-96AD-AE4F-2C74-C511249D5E7A}" name="Source">
+      <FILE id="aX4fz4" name="STFT.cpp" compile="1" resource="0" file="Source/STFT.cpp"/>
+      <FILE id="UELGLd" name="STFT.h" compile="0" resource="0" file="Source/STFT.h"/>
       <FILE id="z3zFVB" name="Dereverb.cpp" compile="1" resource="0" file="Source/Dereverb.cpp"/>
       <FILE id="mgwkuQ" name="Dereverb.hpp" compile="0" resource="0" file="Source/Dereverb.hpp"/>
       <FILE id="pJkZV3" name="PluginProcessor.cpp" compile="1" resource="0"

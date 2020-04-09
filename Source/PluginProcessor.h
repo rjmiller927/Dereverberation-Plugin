@@ -14,6 +14,7 @@
 
 #include <JuceHeader.h>
 #include "Dereverb.hpp"
+#include "STFT.h"
 
 
 //==============================================================================
@@ -72,26 +73,23 @@ public:
     float makeupGain;
     float reverbReductionPercent = 50.f;
     
-    // Adaptive Filter Object
-    Dereverb *dereverbFilter;
+
+    STFT stft;
     
-    enum {
-        fftOrder = 12, // FFT Size is 2^fftOrder
-        fftSize = 1 << fftOrder
-    };
+    
 
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DereverbAudioProcessor)
     
-    // Sampling Rate
-    int Fs;
-    float input;
+    void applyMakeupGain(AudioBuffer<float> &buffer, float linGain);
+    
+   
     
     //==============================================================================
     // FFT Object from JUCE DSP module
-    dsp::FFT fft;
-    // dsp::FFT fft2{fftOrder}; // Initialize directly with int order (FFT size is 2^fftOrder)
+    /*dsp::FFT fft;
+    dsp::FFT fft2{fftOrder}; // Initialize directly with int order (FFT size is 2^fftOrder)
     float fifo[2][fftSize];
     float fftData[2][2*fftSize];
     int fifoIndex[2] = {0};
@@ -103,6 +101,44 @@ private:
     void pushNextSampleIntoFifo(float sample, int channel) noexcept;
     
     int N;
+     */
+    
+    //==============================================================================
+    // FFT Object from GitHub Freq Domain Template (https://github.com/juandagilc/Audio-Effects/tree/master/Template%20Frequency%20Domain)
+    //==============================================================================
+    class PassThrough : public STFT {
+    private:
+        void modification() override
+        {
+            
+            // Forward FFT
+            fft->perform (timeDomainBuffer, frequencyDomainBuffer, false);
+
+            for (int index = 0; index < fftSize / 2 + 1; ++index) {
+                float magnitude = abs (frequencyDomainBuffer[index]);
+                float phase = arg (frequencyDomainBuffer[index]); // Returns the same as atan2(x.imag(),x.real())
+
+                frequencyDomainBuffer[index].real (magnitude * cosf (phase));
+                frequencyDomainBuffer[index].imag (magnitude * sinf (phase));
+
+                // Set negative frequencies to the complex conjugate (except for DC)
+                if (index > 0 && index < fftSize / 2) {
+                    frequencyDomainBuffer[fftSize - index].real (magnitude * cosf (phase));
+                    frequencyDomainBuffer[fftSize - index].imag (magnitude * sinf (-phase));
+                }
+            }
+
+            // Frequency Domain Processing
+            
+            
+            // Inverse FFT
+            fft->perform (frequencyDomainBuffer, timeDomainBuffer, true);
+        }
+    };
+    
+    
+    const int fftSize = 4096;
+    const int hopSize = 2; // Hop size factor, hop samples = fftSize / hopSize
     
     //==============================================================================
 };

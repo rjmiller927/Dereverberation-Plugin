@@ -11,6 +11,34 @@
 
 using namespace std;
 
+void Dereverb::processBuffer(HeapBlock<dsp::Complex<float>> &frequencyDomainBuffer, int numSamples){
+    
+    // frequencyDomain contains real and imaginary pairs as (real,imaginary
+    for (int i = 0; i < numSamples; i++){
+//        cout << "Real: " << frequencyDomainBuffer[i].real() << endl;
+//        cout << "Imag: " << frequencyDomainBuffer[i].imag() << endl;
+        
+        // Take the magnitude squared of the FFT input
+        float real = frequencyDomainBuffer[i].real();
+        float imag = frequencyDomainBuffer[i].imag();
+        P = sqrtf(pow(real,2) + pow(imag, 2));
+        
+        // Calculate R1 and R2. 'setR1R2' method also updates the maskingGain
+        setR1R2(P);
+        
+        // Apply masking gain to real and imaginary parts
+        frequencyDomainBuffer[i].real (real * maskingGain);
+        frequencyDomainBuffer[i].imag (imag * maskingGain);
+        
+        // Check how the output has changed
+//        cout << "Real: " << frequencyDomainBuffer[i].real() << endl;
+//        cout << "Imag: " << frequencyDomainBuffer[i].imag() << endl;
+//        cout << "=================" << endl;
+        
+    }
+    
+}
+
 void Dereverb::processBlock(float *fftChannelData, int numSamples){
     
     
@@ -59,7 +87,7 @@ void Dereverb::setR1R2(float inputPower){
 void Dereverb::setMaskingGain(float R1, float R2){
     
     if ((R1 / R2) >= 1){
-        maskingGain = 0.f;
+        maskingGain = 1.f;
     }
     else{
         // Check if R2 is <= 0 to avoid division by 0 or negative values

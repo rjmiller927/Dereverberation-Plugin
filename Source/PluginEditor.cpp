@@ -92,7 +92,7 @@ void DereverbAudioProcessorEditor::sliderValueChanged(Slider *slider){
     
     // Reverb Reduction Slider
     if (slider == &reverbReductionSlider){
-        
+        processor.stft.dereverbFilter->setAlpha(slider->getValue());
     }
     
     // Make-up gain Slider

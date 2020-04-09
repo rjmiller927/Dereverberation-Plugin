@@ -23,22 +23,22 @@ DereverbAudioProcessor::DereverbAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       ),
+                       )
         // ======================================================
-        // Initialize FFT order in the constructor
+        // Initialize FFT order, window type in the constructor
         // ======================================================
-        fft(fftOrder),
-        window(fftSize, dsp::WindowingFunction<float>::hann) // Initialize window function
+        //fft(fftOrder),
+        //window(fftSize, dsp::WindowingFunction<float>::hann)
 #endif
 {
     
-    dereverbFilter = new Dereverb;
+    // dereverbFilter = new Dereverb;
     
 }
 
 DereverbAudioProcessor::~DereverbAudioProcessor()
 {
-    delete dereverbFilter;
+    // delete dereverbFilter;
 }
 
 //==============================================================================
@@ -106,11 +106,10 @@ void DereverbAudioProcessor::changeProgramName (int index, const String& newName
 //==============================================================================
 void DereverbAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    Fs = sampleRate;
-    N = samplesPerBlock;
-    
     
     // Initialize FFT settings
+    stft.setup(getTotalNumInputChannels());
+    stft.updateParameters(fftSize, hopSize, stft.windowTypeHann);
     
 }
 
@@ -154,41 +153,39 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
         buffer.clear (i, 0, buffer.getNumSamples());
     
     // Update alpha values
-    dereverbFilter->setAlpha(reverbReductionPercent);
+    // dereverbFilter->setAlpha(reverbReductionPercent);
+    // dereverbFilter->setAlpha(95.f);
     
-    // Cast buffer to an AudioSourceChannelInfo type
-    AudioSourceChannelInfo bufferToFill = AudioSourceChannelInfo(buffer);
-    
-    //================================
-    // Process Block
-    //================================
-    for (int channel = 0; channel < buffer.getNumChannels(); channel++){
+    // Convert to Frequency Domain
+    if (bypassCheck == 1) {
+        stft.processBlock(buffer);
         
-        // Prepare next audio block for FFT
-        getNextAudioBlock(bufferToFill, channel);
+        // Make up gain
+        float linGain = pow(10.f, makeupGain / 20.f);
         
-        if (nextFFTBlockReady == true){
-            
-            // Apply window filter
-            window.multiplyWithWindowingTable(fftData[channel],sizeof(fftData[channel]));
-            
-            // FFT. According to JUCE documentation, the forward FFT interleaves real and imaginary parts, such that the first value is real and the second value is the associated imaginary component.
-            fft.performRealOnlyForwardTransform(fftData[channel]);
-            
-            // Dereverb Processing
-            dereverbFilter->processBlock(fftData[channel], 2*fftSize);
-            
-            // IFFT
-            fft.performRealOnlyInverseTransform(fftData[channel]);
-            
-            // Reset nextFFTBlockReady
-            nextFFTBlockReady = false;
-            
-        }
+        applyMakeupGain(buffer, linGain);
     }
+    
+    
+    
+    
 }
 
-void DereverbAudioProcessor::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill, int channel){
+void DereverbAudioProcessor::applyMakeupGain(AudioBuffer<float> &buffer, float linGain){
+    
+    for (int channel = 0; channel < buffer.getNumChannels(); channel++){
+        for (int sample = 0; sample < buffer.getNumSamples(); sample ++){
+            float inputSample = buffer.getReadPointer(channel)[sample];
+            inputSample *= linGain;
+            buffer.getWritePointer(channel)[sample] = inputSample;
+        }
+    }
+    
+}
+
+
+/*
+ void DereverbAudioProcessor::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill, int channel){
     if (bufferToFill.buffer->getNumChannels() > 0){
         auto *channelData = bufferToFill.buffer->getReadPointer(channel, bufferToFill.startSample);
         
@@ -197,8 +194,10 @@ void DereverbAudioProcessor::getNextAudioBlock(const AudioSourceChannelInfo &buf
         }
     }
 }
+ */
 
 
+/*
 void DereverbAudioProcessor::pushNextSampleIntoFifo(float sample, int channel) noexcept{
     if (fifoIndex[channel] == fftSize){
         if (!nextFFTBlockReady){
@@ -213,6 +212,7 @@ void DereverbAudioProcessor::pushNextSampleIntoFifo(float sample, int channel) n
     fifoIndex[channel]++;
     
 }
+ */
 
 //==============================================================================
 bool DereverbAudioProcessor::hasEditor() const
