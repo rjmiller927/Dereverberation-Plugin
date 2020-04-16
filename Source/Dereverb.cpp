@@ -15,25 +15,18 @@ void Dereverb::processBuffer(HeapBlock<dsp::Complex<float>> &frequencyDomainBuff
     
     // frequencyDomain contains real and imaginary pairs as (real,imaginary
     for (int i = 0; i < numSamples; i++){
-//        cout << "Real: " << frequencyDomainBuffer[i].real() << endl;
-//        cout << "Imag: " << frequencyDomainBuffer[i].imag() << endl;
         
         // Take the magnitude squared of the FFT input
         float real = frequencyDomainBuffer[i].real();
         float imag = frequencyDomainBuffer[i].imag();
-        P = sqrtf(pow(real,2) + pow(imag, 2));
+        P = powf(abs(frequencyDomainBuffer[i]), 2);
         
         // Calculate R1 and R2. 'setR1R2' method also updates the maskingGain
-        setR1R2(P);
+        setR1R2(P, i);
         
         // Apply masking gain to real and imaginary parts
         frequencyDomainBuffer[i].real (real * maskingGain);
         frequencyDomainBuffer[i].imag (imag * maskingGain);
-        
-        // Check how the output has changed
-//        cout << "Real: " << frequencyDomainBuffer[i].real() << endl;
-//        cout << "Imag: " << frequencyDomainBuffer[i].imag() << endl;
-//        cout << "=================" << endl;
         
     }
     
@@ -48,7 +41,7 @@ void Dereverb::processBlock(float *fftChannelData, int numSamples){
         P = sqrtf(pow(fftChannelData[i],2) + pow(fftChannelData[i+1],2));
         
         // Calculate R1 and R2. 'setR1R2' also updates 'maskingGain'
-        setR1R2(P);
+        setR1R2(P, i);
         
         // Apply masking gain to real and imaginary parts
         fftChannelData[i] *= maskingGain;
@@ -57,30 +50,18 @@ void Dereverb::processBlock(float *fftChannelData, int numSamples){
     }
 }
 
-void Dereverb::setAlpha(float dereverbPercent){
-    
-    // Normalize the de-reverb percentage to scale of 0-1
-    float normPercent = dereverbPercent / 100.f;
-    
-    // Update alpha1 and alpha2. NOTE:
-    //  o alpha1 + alpha2 ~= 1.0
-    //  o alpha1 = [0.0, 0.49]
-    //  o alpha2 = [0.5, 0.99]
-    alpha2 = 0.5f + normPercent*0.49f;
-    alpha1 = 1.f - alpha2;
-    
-}
 
-void Dereverb::setR1R2(float inputPower){
+
+void Dereverb::setR1R2(float inputPower, int bin){
     
-    R1 = (1.f-alpha1)*inputPower + alpha1*R1prev;
-    R2 = (1.f-alpha2)*inputPower + alpha2*R2prev;
+    R1[bin] = (1.f-alpha1)*inputPower + (alpha1*R1prev[bin]);
+    R2[bin] = (1.f-alpha2)*inputPower + (alpha2*R2prev[bin]);
     
-    R1prev = R1;
-    R2prev = R2;
+    R1prev[bin] = R1[bin];
+    R2prev[bin] = R2[bin];
     
     // Set new masking gain after updating R1, R2
-    setMaskingGain(R1, R2);
+    setMaskingGain(R1[bin], R2[bin]);
     
 }
 
@@ -99,5 +80,20 @@ void Dereverb::setMaskingGain(float R1, float R2){
             maskingGain = R1 / R2;
         }
     }
+    
+}
+
+
+void Dereverb::setAlpha(float dereverbPercent){
+    
+    // Normalize the de-reverb percentage to scale of 0-1
+    float normPercent = dereverbPercent / 100.f;
+    
+    // Update alpha1 and alpha2. NOTE:
+    //  o alpha1 + alpha2 ~= 1.0
+    //  o alpha1 = [0.0, 0.49]
+    //  o alpha2 = [0.5, 0.99]
+    alpha2 = 0.5f + normPercent*0.49f;
+    alpha1 = 1.f - alpha2;
     
 }

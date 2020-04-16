@@ -61,6 +61,7 @@ void STFT::processBlock (AudioSampleBuffer& block)
                 currentInputBufferWritePosition = 0;
             
             channelData[sample] = outputBuffer.getSample (channel, currentOutputBufferReadPosition);
+            //cout << channelData[sample] << endl;
             
             outputBuffer.setSample (channel, currentOutputBufferReadPosition, 0.0f);
             if (++currentOutputBufferReadPosition >= outputBufferLength)

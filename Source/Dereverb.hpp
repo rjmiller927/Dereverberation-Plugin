@@ -40,16 +40,16 @@ private:
     float P = 0.f;
     
     // R1, R2 are the averaged power spectrum values. Calculated using exponential moving average
-    float R1 = 0.0f;
-    float R2 = 0.0f;
-    float R1prev = 0.0f;
-    float R2prev = 0.0f;
+    float R1[4096] = {0.0f};
+    float R2[4096] = {0.0f};
+    float R1prev[4096] = {0.0f};
+    float R2prev[4096] = {0.0f};
     
     // Masking gain
     float maskingGain = 0.0f;
     
     // R1, R2, maskingGain update methods
-    void setR1R2(float inputPower);
+    void setR1R2(float inputPower, int bin);
     void setMaskingGain(float R1, float R2);
     
 };

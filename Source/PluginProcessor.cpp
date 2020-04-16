@@ -24,21 +24,12 @@ DereverbAudioProcessor::DereverbAudioProcessor()
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
                        )
-        // ======================================================
-        // Initialize FFT order, window type in the constructor
-        // ======================================================
-        //fft(fftOrder),
-        //window(fftSize, dsp::WindowingFunction<float>::hann)
 #endif
 {
-    
-    // dereverbFilter = new Dereverb;
-    
 }
 
 DereverbAudioProcessor::~DereverbAudioProcessor()
 {
-    // delete dereverbFilter;
 }
 
 //==============================================================================
@@ -143,6 +134,7 @@ bool DereverbAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts)
 }
 #endif
 
+
 void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
@@ -152,22 +144,15 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    // Update alpha values
-    // dereverbFilter->setAlpha(reverbReductionPercent);
-    // dereverbFilter->setAlpha(95.f);
     
-    // Convert to Frequency Domain
+    // If bypass button is disabled ( == 1), then perform frequency domain processing and apply makeup gain
     if (bypassCheck == 1) {
         stft.processBlock(buffer);
         
         // Make up gain
         float linGain = pow(10.f, makeupGain / 20.f);
-        
         applyMakeupGain(buffer, linGain);
     }
-    
-    
-    
     
 }
 
@@ -180,39 +165,9 @@ void DereverbAudioProcessor::applyMakeupGain(AudioBuffer<float> &buffer, float l
             buffer.getWritePointer(channel)[sample] = inputSample;
         }
     }
-    
 }
 
 
-/*
- void DereverbAudioProcessor::getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill, int channel){
-    if (bufferToFill.buffer->getNumChannels() > 0){
-        auto *channelData = bufferToFill.buffer->getReadPointer(channel, bufferToFill.startSample);
-        
-        for (auto i=0; i < bufferToFill.numSamples; i++){
-            pushNextSampleIntoFifo(channelData[i], channel);
-        }
-    }
-}
- */
-
-
-/*
-void DereverbAudioProcessor::pushNextSampleIntoFifo(float sample, int channel) noexcept{
-    if (fifoIndex[channel] == fftSize){
-        if (!nextFFTBlockReady){
-            zeromem(fftData, sizeof(fftData));
-            memcpy(fftData, fifo, sizeof(fifo));
-            nextFFTBlockReady = true;
-        }
-        fifoIndex[channel] = 0;
-    }
-    
-    fifo[channel][fifoIndex[channel]] = sample;
-    fifoIndex[channel]++;
-    
-}
- */
 
 //==============================================================================
 bool DereverbAudioProcessor::hasEditor() const

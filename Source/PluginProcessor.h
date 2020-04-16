@@ -74,8 +74,8 @@ public:
     float reverbReductionPercent = 50.f;
     
 
+    // Spectral processing object
     STFT stft;
-    
     
 
 private:
@@ -84,61 +84,14 @@ private:
     
     void applyMakeupGain(AudioBuffer<float> &buffer, float linGain);
     
-   
-    
-    //==============================================================================
-    // FFT Object from JUCE DSP module
-    /*dsp::FFT fft;
-    dsp::FFT fft2{fftOrder}; // Initialize directly with int order (FFT size is 2^fftOrder)
-    float fifo[2][fftSize];
-    float fftData[2][2*fftSize];
-    int fifoIndex[2] = {0};
-    bool nextFFTBlockReady = false;
-    
-    dsp::WindowingFunction<float> window;
-    
-    void getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill, int channel);
-    void pushNextSampleIntoFifo(float sample, int channel) noexcept;
-    
-    int N;
-     */
     
     //==============================================================================
     // FFT Object from GitHub Freq Domain Template (https://github.com/juandagilc/Audio-Effects/tree/master/Template%20Frequency%20Domain)
     //==============================================================================
-    class PassThrough : public STFT {
-    private:
-        void modification() override
-        {
-            
-            // Forward FFT
-            fft->perform (timeDomainBuffer, frequencyDomainBuffer, false);
-
-            for (int index = 0; index < fftSize / 2 + 1; ++index) {
-                float magnitude = abs (frequencyDomainBuffer[index]);
-                float phase = arg (frequencyDomainBuffer[index]); // Returns the same as atan2(x.imag(),x.real())
-
-                frequencyDomainBuffer[index].real (magnitude * cosf (phase));
-                frequencyDomainBuffer[index].imag (magnitude * sinf (phase));
-
-                // Set negative frequencies to the complex conjugate (except for DC)
-                if (index > 0 && index < fftSize / 2) {
-                    frequencyDomainBuffer[fftSize - index].real (magnitude * cosf (phase));
-                    frequencyDomainBuffer[fftSize - index].imag (magnitude * sinf (-phase));
-                }
-            }
-
-            // Frequency Domain Processing
-            
-            
-            // Inverse FFT
-            fft->perform (frequencyDomainBuffer, timeDomainBuffer, true);
-        }
-    };
-    
+        
     
     const int fftSize = 4096;
-    const int hopSize = 2; // Hop size factor, hop samples = fftSize / hopSize
+    const int hopSize = 8; // Hop size factor, hop samples = fftSize / hopSize
     
     //==============================================================================
 };
