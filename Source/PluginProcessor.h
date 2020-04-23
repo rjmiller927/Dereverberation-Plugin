@@ -65,16 +65,14 @@ public:
     // USER DEFINED VARIABLES
     //==============================================================================
     
-    // Checks if plugin is in bypass state (-1) or not (1)
-    int bypassCheck = 1;
-    
-    // Mix corresponds to reverb reduction amount. When reduction is 100%, that means that the output is entirely the adaptive filter output. When reduction is 0%, then the output is the same as the input
-    float mix;
-    float makeupGain;
-    float reverbReductionPercent = 50.f;
+    // Holds the states of all parameters
+    AudioProcessorValueTreeState state;
+    AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     
 
-    // Spectral processing object
+    //==============================================================================
+    // FFT Object from GitHub Freq Domain Template (https://github.com/juandagilc/Audio-Effects/tree/master/Template%20Frequency%20Domain)
+    //==============================================================================
     STFT stft;
     
 
@@ -84,14 +82,14 @@ private:
     
     void applyMakeupGain(AudioBuffer<float> &buffer, float linGain);
     
-    
-    //==============================================================================
-    // FFT Object from GitHub Freq Domain Template (https://github.com/juandagilc/Audio-Effects/tree/master/Template%20Frequency%20Domain)
-    //==============================================================================
-        
-    
+    // FFT Parameters
     const int fftSize = 4096;
-    const int hopSize = 8; // Hop size factor, hop samples = fftSize / hopSize
+    const int hopSize = 8; // Hop size factor; hop samples = fftSize / hopSize
+    
+    // Parameter smoothing
+    float gainSmooth = 0.f;
+    
+    float alpha = 0.999f;
     
     //==============================================================================
 };

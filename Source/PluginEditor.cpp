@@ -22,41 +22,54 @@ DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcess
     // editor's size to whatever you need it to be.
     setSize (400, 250);
     
+    // ===========================================
     // REVERB REDUCTION SLIDER
-    reverbReductionSlider.addListener(this);
+    // ===========================================
     reverbReductionSlider.setSliderStyle(Slider::LinearHorizontal);
-    reverbReductionSlider.setRange(0.0f, 100.0f, 0.01f);
+    reverbReductionSlider.setRange(0.0f, 100.0f, 1.f);
     reverbReductionSlider.setBounds(125, 30, 250, 75);
     reverbReductionSlider.setTextBoxStyle(Slider::TextBoxLeft, false, 50, 25);
     addAndMakeVisible(reverbReductionSlider);
+    
+    sliderAttachment.emplace_back(new AudioProcessorValueTreeState::SliderAttachment(
+                                                                        processor.state, "DEREVERB", reverbReductionSlider));
     
     reverbSliderLabel.setText("Reverb Reduction(%)", dontSendNotification);
     reverbSliderLabel.attachToComponent(&reverbReductionSlider, true);
     reverbSliderLabel.setJustificationType(Justification::left);
     addAndMakeVisible(reverbSliderLabel);
     
+    // ===========================================
     // MAKEUP GAIN SLIDER
-    makeupGainSlider.addListener(this);
+    // ===========================================
     makeupGainSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
     makeupGainSlider.setRange(-6.0f, 6.0f, 0.01f); // Value in dB
     makeupGainSlider.setBounds(150, 130, 115, 115);
     makeupGainSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 50, 20);
     addAndMakeVisible(makeupGainSlider);
     
+    sliderAttachment.emplace_back(new AudioProcessorValueTreeState::SliderAttachment(
+                                                                processor.state, "MAKEUPGAIN", makeupGainSlider));
+    
     makeupGainLabel.setText("Make-up Gain (dB)", dontSendNotification);
     makeupGainLabel.attachToComponent(&makeupGainSlider, false);
     makeupGainLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(makeupGainLabel);
     
+    // ===========================================
     // BYPASS BUTTON
-    bypassButton.addListener(this);
+    // ===========================================
+    //bypassButton.addListener(this);
     bypassButton.setBounds(50, 130, 75, 30);
+    bypassButton.setClickingTogglesState(true);
     addAndMakeVisible(bypassButton);
     
     bypassLabel.setText("Bypass", dontSendNotification);
     bypassLabel.attachToComponent(&bypassButton, false);
     bypassLabel.setJustificationType(Justification::left);
     addAndMakeVisible(bypassLabel);
+    
+    buttonAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(processor.state, "BYPASS", bypassButton);
 
     
 }
@@ -90,21 +103,9 @@ void DereverbAudioProcessorEditor::resized()
 
 void DereverbAudioProcessorEditor::sliderValueChanged(Slider *slider){
     
-    // Reverb Reduction Slider
-    if (slider == &reverbReductionSlider){
-        processor.stft.dereverbFilter->setAlpha(slider->getValue());
-    }
-    
-    // Make-up gain Slider
-    if (slider == &makeupGainSlider){
-        processor.makeupGain = slider -> getValue();
-    }
 }
 
 void DereverbAudioProcessorEditor::buttonClicked(Button *button){
     
-    if (button == &bypassButton){
-        processor.bypassCheck *= -1;
-    }
-    
 }
+

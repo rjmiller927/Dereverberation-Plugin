@@ -41,13 +41,25 @@ private:
     // access the processor object that created it.
     DereverbAudioProcessor& processor;
     
+    
+    //==============================================================================
     // Define GUI controls
+    //==============================================================================
     Slider reverbReductionSlider;
     Slider makeupGainSlider;
-    
     ToggleButton bypassButton;
     
-    // GUI Labels
+    
+    //==============================================================================
+    // GUI componenet attachements
+    //==============================================================================
+    std::vector<std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>> sliderAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::ButtonAttachment> buttonAttachment;
+    
+    
+    //==============================================================================
+    // GUI component labels
+    //==============================================================================
     Label reverbSliderLabel;
     Label makeupGainLabel;
     Label bypassLabel;

@@ -72,8 +72,8 @@ void Dereverb::setMaskingGain(float R1, float R2){
     }
     else{
         // Check if R2 is <= 0 to avoid division by 0 or negative values
-        // float epsilon = numeric_limits<double>::epsilon();
-        if (R2 <= 0.f){
+        float epsilon = numeric_limits<double>::epsilon();
+        if (R2 <= epsilon){
             maskingGain = 0.f;
         }
         else{

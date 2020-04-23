@@ -23,13 +23,27 @@ DereverbAudioProcessor::DereverbAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),state(*this, nullptr, Identifier("DereverbParameters"), createParameterLayout())
 #endif
 {
 }
 
 DereverbAudioProcessor::~DereverbAudioProcessor()
 {
+}
+
+// Return Type                                  // Function Name
+AudioProcessorValueTreeState::ParameterLayout DereverbAudioProcessor::createParameterLayout(){
+    
+    std::vector<std::unique_ptr<RangedAudioParameter>> params;
+    
+                                                          //Identifier  DAW Display  [  Range  ]  IC
+    params.push_back(std::make_unique<AudioParameterFloat>("DEREVERB", "Dereverb %", 0.f, 100.f, 0.f));
+    params.push_back(std::make_unique<AudioParameterFloat>("MAKEUPGAIN", "Make Up Gain", -6.f, 6.f, 0.f));
+    params.push_back(std::make_unique<AudioParameterBool>("BYPASS", "Bypass", false));
+    
+    return {params.begin(), params.end()};
+    
 }
 
 //==============================================================================
@@ -144,13 +158,19 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
+    // Update parameters from value tree state
+    float dereverbPercent = *state.getRawParameterValue("DEREVERB");
+    stft.dereverbFilter->setAlpha(dereverbPercent);
     
-    // If bypass button is disabled ( == 1), then perform frequency domain processing and apply makeup gain
-    if (bypassCheck == 1) {
+    float dBGain = *state.getRawParameterValue("MAKEUPGAIN");
+    bool bypassCheck = *state.getRawParameterValue("BYPASS");
+    
+    // If bypass button is disabled (bypassCheck = false), then perform frequency domain processing and apply makeup gain
+    if (bypassCheck == false) {
         stft.processBlock(buffer);
         
         // Make up gain
-        float linGain = pow(10.f, makeupGain / 20.f);
+        float linGain = pow(10.f, dBGain / 20.f);
         applyMakeupGain(buffer, linGain);
     }
     
@@ -161,6 +181,7 @@ void DereverbAudioProcessor::applyMakeupGain(AudioBuffer<float> &buffer, float l
     for (int channel = 0; channel < buffer.getNumChannels(); channel++){
         for (int sample = 0; sample < buffer.getNumSamples(); sample ++){
             float inputSample = buffer.getReadPointer(channel)[sample];
+            gainSmooth = (1.f - alpha)*linGain + alpha*gainSmooth;
             inputSample *= linGain;
             buffer.getWritePointer(channel)[sample] = inputSample;
         }
@@ -186,12 +207,28 @@ void DereverbAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    
+    
+    auto currentState = state.copyState();
+    std::unique_ptr<XmlElement> xml(currentState.createXml());
+    copyXmlToBinary(*xml, destData);
+     
+    
 }
 
 void DereverbAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    
+    
+    std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+    
+    if (xmlState && xmlState->hasTagName(state.state.getType())){
+        state.replaceState(ValueTree::fromXml(*xmlState));
+    }
+     
+    
 }
 
 //==============================================================================

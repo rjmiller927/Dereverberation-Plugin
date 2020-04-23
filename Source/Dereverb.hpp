@@ -3,12 +3,16 @@
 //  De-Reverb - AU
 //
 //  Created by Ryan Miller on 2/8/20.
-//
-// This class implements a blind dereverberation effect inspired by the following paper:
-//
-// K. Ohtani, T. Komatsu, T. Nishino, K. Takeda, "Adaptive Dereverberation method based on complementary wiener filter and modulation transfer function", REVERB Workshop 2014
-//
-// Modifications include removal of spectral subtraction block and user-controlled alpha values instead of adaptive alpha values. Issues in implementing the adaptive algorithm, in particular the frequency response of the maskingGain as shown in Equation (16) in the paper, rendered the adaptive functionality non-working, so user controlled alpha's was implemented to control the amount of de-reverberation
+
+
+/*
+ 
+ This class implements a blind dereverberation effect inspired by the following paper:
+
+ K. Ohtani, T. Komatsu, T. Nishino, K. Takeda, "Adaptive Dereverberation method based on complementary wiener filter and modulation transfer function", REVERB Workshop 2014
+
+ Modifications include removal of spectral subtraction block and user-controlled alpha values instead of adaptive alpha values. Issues in implementing the adaptive algorithm, in particular the frequency response of the maskingGain as shown in Equation (16) in the paper, rendered the adaptive functionality non-working, so user controlled alpha's were implemented to control the amount of de-reverberation
+ */
 
 
 

@@ -9,6 +9,7 @@
 */
 
 #include "STFT.h"
+#include "PluginProcessor.h"
 
 
 
@@ -44,6 +45,8 @@ void STFT::updateParameters (const int newFftSize, const int newOverlap, const i
 
 void STFT::processBlock (AudioSampleBuffer& block)
 {
+    
+    
     numSamples = block.getNumSamples();
     
     for (int channel = 0; channel < numChannels; ++channel) {
