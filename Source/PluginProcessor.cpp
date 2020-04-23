@@ -116,6 +116,10 @@ void DereverbAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     stft.setup(getTotalNumInputChannels());
     stft.updateParameters(fftSize, hopSize, stft.windowTypeHann);
     
+    // Update FS for VU analysis
+    inputvuAnalysis.setSampleRate(sampleRate);
+    outputvuAnalysis.setSampleRate(sampleRate);
+    
 }
 
 void DereverbAudioProcessor::releaseResources()
@@ -160,6 +164,7 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     
     // Update parameters from value tree state
     float dereverbPercent = *state.getRawParameterValue("DEREVERB");
+    dereverbSmooth = (1.f - alpha)*dereverbPercent + alpha*dereverbSmooth;
     stft.dereverbFilter->setAlpha(dereverbPercent);
     
     float dBGain = *state.getRawParameterValue("MAKEUPGAIN");
@@ -173,6 +178,23 @@ void DereverbAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
         float linGain = pow(10.f, dBGain / 20.f);
         applyMakeupGain(buffer, linGain);
     }
+    else{
+        // Perform metering. With bypass on, output metering = input metering
+        for (int channel = 0; channel < buffer.getNumChannels(); channel++){
+            for (int sample = 0; sample < buffer.getNumSamples(); sample ++){
+                float inputSample = buffer.getReadPointer(channel)[sample];
+                buffer.getWritePointer(channel)[sample] = inputSample;
+                
+                // Metering
+                inValue[channel] = inputvuAnalysis.processSample(inputSample, channel);
+                outValue[channel] = outputvuAnalysis.processSample(inputSample, channel);
+            }
+        }
+        
+        // Assign meter value to the max value of L, R channels
+        inputMeterValue = jmax(inValue[0], inValue[1]);
+        outputMeterValue = jmax(outValue[0], outValue[1]);
+    }
     
 }
 
@@ -182,10 +204,19 @@ void DereverbAudioProcessor::applyMakeupGain(AudioBuffer<float> &buffer, float l
         for (int sample = 0; sample < buffer.getNumSamples(); sample ++){
             float inputSample = buffer.getReadPointer(channel)[sample];
             gainSmooth = (1.f - alpha)*linGain + alpha*gainSmooth;
-            inputSample *= linGain;
-            buffer.getWritePointer(channel)[sample] = inputSample;
+            float outputSample = inputSample * linGain;
+            buffer.getWritePointer(channel)[sample] = outputSample;
+            
+            // Metering
+            inValue[channel] = inputvuAnalysis.processSample(inputSample, channel);
+            outValue[channel] = outputvuAnalysis.processSample(outputSample, channel);
         }
     }
+    
+    // Assign meter value to the max value of L, R channels
+    inputMeterValue = jmax(inValue[0], inValue[1]);
+    outputMeterValue = jmax(outValue[0], outValue[1]);
+    
 }
 
 

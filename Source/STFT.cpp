@@ -22,9 +22,7 @@ STFT::STFT() : numChannels (1)
 
 STFT::~STFT()
 {
-    
 }
-
 
 
 //======================================
@@ -64,7 +62,6 @@ void STFT::processBlock (AudioSampleBuffer& block)
                 currentInputBufferWritePosition = 0;
             
             channelData[sample] = outputBuffer.getSample (channel, currentOutputBufferReadPosition);
-            //cout << channelData[sample] << endl;
             
             outputBuffer.setSample (channel, currentOutputBufferReadPosition, 0.0f);
             if (++currentOutputBufferReadPosition >= outputBufferLength)
@@ -73,9 +70,11 @@ void STFT::processBlock (AudioSampleBuffer& block)
             if (++currentSamplesSinceLastFFT >= hopSize) {
                 currentSamplesSinceLastFFT = 0;
                 
+                //======================================
                 analysis (channel);
                 modification();
                 synthesis (channel);
+                //======================================
                 
             }
         }

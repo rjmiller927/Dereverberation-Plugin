@@ -15,6 +15,7 @@
 #include <JuceHeader.h>
 #include "Dereverb.hpp"
 #include "STFT.h"
+#include "VUAnalysis.h"
 
 
 //==============================================================================
@@ -75,6 +76,10 @@ public:
     //==============================================================================
     STFT stft;
     
+    
+    // Meter value parameter, connects to front end. std::atomic<> makes sure it doesn't interrupt audio processing thread
+    std::atomic<float> inputMeterValue;
+    std::atomic<float> outputMeterValue;
 
 private:
     //==============================================================================
@@ -88,8 +93,14 @@ private:
     
     // Parameter smoothing
     float gainSmooth = 0.f;
+    float dereverbSmooth = 0.f;
+    float alpha = 0.997f;
     
-    float alpha = 0.999f;
+    // VU Object. Meter will display higher of the stereo channel values at any moment in time
+    VUAnalysis inputvuAnalysis;
+    VUAnalysis outputvuAnalysis;
+    float inValue[2] = {0.f};
+    float outValue[2] = {0.f};
     
     //==============================================================================
 };

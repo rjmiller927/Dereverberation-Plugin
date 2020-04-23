@@ -20,7 +20,7 @@ DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcess
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 250);
+    setSize (400, 300);
     
     // ===========================================
     // REVERB REDUCTION SLIDER
@@ -44,7 +44,7 @@ DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcess
     // ===========================================
     makeupGainSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
     makeupGainSlider.setRange(-6.0f, 6.0f, 0.01f); // Value in dB
-    makeupGainSlider.setBounds(150, 130, 115, 115);
+    makeupGainSlider.setBounds(125, 130, 115, 115);
     makeupGainSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 50, 20);
     addAndMakeVisible(makeupGainSlider);
     
@@ -71,6 +71,16 @@ DereverbAudioProcessorEditor::DereverbAudioProcessorEditor (DereverbAudioProcess
     
     buttonAttachment = std::make_unique<AudioProcessorValueTreeState::ButtonAttachment>(processor.state, "BYPASS", bypassButton);
 
+    // ===========================================
+    // VU METER
+    // ===========================================
+    inputMeter.setBounds(300, 100, 20, 165);
+    addAndMakeVisible(inputMeter);
+    
+    outputMeter.setBounds(350, 100, 20, 165); // x, y, width, height
+    addAndMakeVisible(outputMeter);
+    
+    startTimer(60);
     
 }
 
@@ -91,6 +101,9 @@ void DereverbAudioProcessorEditor::paint (Graphics& g)
     g.drawFittedText ("De-Reverberator", getLocalBounds(), Justification::centredTop, 1);
     g.setFont(12.0f);
     g.drawFittedText("Ryan Miller", getLocalBounds(), Justification::bottomRight, 1);
+    g.setFont(14.0f);
+    g.drawFittedText("Input", 290, 75, 40, 20, Justification::left, 1);
+    g.drawFittedText("Output", 340, 75, 40, 20, Justification::left, 1);
     
     
 }
@@ -109,3 +122,7 @@ void DereverbAudioProcessorEditor::buttonClicked(Button *button){
     
 }
 
+void DereverbAudioProcessorEditor::timerCallback(){
+    inputMeter.update(processor.inputMeterValue);
+    outputMeter.update(processor.outputMeterValue);
+}

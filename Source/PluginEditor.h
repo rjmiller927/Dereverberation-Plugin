@@ -15,13 +15,16 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "Dereverb.hpp"
+#include "SimpleMeter.h"
+
 
 //==============================================================================
 /**
 */
 class DereverbAudioProcessorEditor  :   public AudioProcessorEditor,
                                         public Slider::Listener,
-                                        public Button::Listener
+                                        public Button::Listener,
+                                        public Timer
 {
 public:
     DereverbAudioProcessorEditor (DereverbAudioProcessor&);
@@ -32,8 +35,8 @@ public:
     void resized() override;
     
     void sliderValueChanged(Slider *slider) override;
-    
     void buttonClicked(Button *button) override;
+    void timerCallback() override;
     
 
 private:
@@ -58,12 +61,23 @@ private:
     
     
     //==============================================================================
+    // GUI Meters
+    //==============================================================================
+    SimpleMeter inputMeter;
+    SimpleMeter outputMeter;
+    
+    
+    //==============================================================================
     // GUI component labels
     //==============================================================================
     Label reverbSliderLabel;
     Label makeupGainLabel;
     Label bypassLabel;
+    Label inputMeterLabel;
+    Label outputMeterLabel;
     
 
+    
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DereverbAudioProcessorEditor)
 };
