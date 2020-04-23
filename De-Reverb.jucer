@@ -15,6 +15,8 @@
       <FILE id="RDjUhW" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="WmoPK6" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="GmK9pV" name="SimpleMeter.h" compile="0" resource="0" file="../../../Belmont/5_Fourth Semester/AET 5895/AET5895-SP20/ClassExamples/PitchShifter/Source/SimpleMeter.h"/>
+      <FILE id="HXZNKn" name="VUAnalysis.h" compile="0" resource="0" file="../../../Belmont/5_Fourth Semester/AET 5895/AET5895-SP20/ClassExamples/PitchShifter/Source/VUAnalysis.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
